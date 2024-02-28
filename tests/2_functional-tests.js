@@ -3,22 +3,13 @@ const chai = require('chai');
 const assert = chai.assert;
 const server = require('../server');
 
+let id = '';
+let reply_id = '';
+
 chai.use(chaiHttp);
 
 suite('Functional Tests', function() {
-    suite("Send requests to /api/threads/:board", () => {
-        let id = '65d9cb2e387a1bc46c98d341';
-        test("Get the 10 most recent threads with 3 replies each", (done) => {
-            chai
-                .request(server)
-                .get("/api/threads/general")
-                .end((req, res) => {
-                    assert.equal(res.status, 200);
-                    assert.isArray(res.body, "response should be an array");
-
-                    done();
-                });
-        });
+    suite("Send requests to /api/threads/:board", () => {        
         test("Create a new thread", (done) => {
             chai
                 .request(server)
@@ -28,21 +19,43 @@ suite('Functional Tests', function() {
                     id = res.body._id;
                     assert.equal(res.status, 200);
                     assert.isObject(res.body, "Response should be an object");
-                    assert.property(res.body, "thread_id", "There should be a thread_id property");
+                    assert.property(res.body, "_id", "There should be a _id property");
                     assert.property(res.body, "text", "There should be a text property");
                     assert.property(res.body, "replies", "There should be a replies property");
-                    assert.isArray(res.body.replies, 'Expected replies to be an array');
-                    assert.property(res.body, "created_on", "There should be a created_on property");                    
-                    assert.property(res.body, "bumped_on", "There should be a bumped_on property");
+                    assert.isArray(res.body.replies, 'Expects replies to be an array');
+                    assert.property(res.body, "created_on", "There should be a created_on key");     
+                    assert.property(res.body, "bumped_on", "There should be a bumped_on key");
+                    assert.isUndefined(res.body.delete_password, "There should be no delete_password key");
+                    assert.isUndefined(res.body.reported, "There should be no reported key");
 
                     done();
                 });
         });
+        test("Get the 10 most recent threads with 3 replies each", (done) => {
+            chai
+                .request(server)
+                .get("/api/threads/general")
+                .end((req, res) => {
+                    assert.equal(res.status, 200);
+                    assert.isArray(res.body, "response should be an array");
+                    assert.isAtLeast(res.body.length, 0, "response should have at least 0 threads");
+                    assert.isAtMost(res.body.length, 10, "response should have at most 10 threads");
+                    assert.property(res.body[0], "text", "thread should have a text property");
+                    assert.property(res.body[0], "created_on", "thread should have a created_on property");
+                    assert.property(res.body[0], "bumped_on", "thread should have a bumped");
+                    assert.property(res.body[0], "replies", "thread should have a replies property");
+                    assert.property(res.body[0], "replycount", "thread should have a replycount property");
+                    //assert.isArray(res.body[0], "replies", "Expects replies to be an array");
+                    
+                    done();
+                });
+        });
+        
         test("Report a thread", (done) => {
             chai
                 .request(server)
                 .put("/api/threads/general")
-                .send({ report_id: id })
+                .send({ thread_id: id })
                 .end((req, res) => {
                     assert.equal(res.status, 200);
                     assert.isString(res.text, "response should be a string");
@@ -79,9 +92,8 @@ suite('Functional Tests', function() {
         });
     });
     suite("Send requests to /api/replies/:board", () => {
-        let id = '65d9cb2e387a1bc46c98d341';
-        let reply_id = '';
         test("Get a single thread with all replies", (done) => {
+            id= '65df0dcfe119280542fa46dd'
             chai
                 .request(server)
                 .get("/api/replies/general")
@@ -93,8 +105,9 @@ suite('Functional Tests', function() {
                     assert.property(res.body, "replies", "There should be a replies property");
                     assert.isArray(res.body.replies, 'Expected replies to be an array');
                     assert.property(res.body, "created_on", "There should be a created_on property");
-
-                    done();
+                    assert.property(res.body, "bumped_on", "There should be a bumped_on property");
+                    
+                   done();
                 });
         });
         test("Create a new reply", (done) => {
@@ -103,6 +116,7 @@ suite('Functional Tests', function() {
                 .post("/api/replies/general")
                 .send({ thread_id: id, text: 'new reply created', delete_password: 'deletereply' })
                 .end((req, res) => {
+                    reply_id = res.body._id
                     assert.equal(res.status, 200);
                     assert.isObject(res.body, "Response should be an object");
                     assert.property(res.body, "reported", "There should be a reported property")
@@ -110,7 +124,7 @@ suite('Functional Tests', function() {
                     assert.property(res.body, "created_on", "There should be a created_on property");
                     assert.property(res.body, "delete_password", "There should be a delete_password property");
 
-                    reply_id = res.body._id;
+                    //reply_id = res.body._id;
 
                     done();
                 });

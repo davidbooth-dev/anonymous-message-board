@@ -11,8 +11,7 @@ const ReplySchema = new schema({
     },
     created_on: {
         type: Date,
-        required: true,
-        default: Date.now
+        required: true
     },
     delete_password: {
         type: String,

@@ -15,11 +15,13 @@ const MessageSchema = new schema({
     },
     created_on: {
         type: Date,
-        required: true
+        required: true,
+        default: new Date()
     },
     bumped_on: {
         type: Date,
-        required: true
+        required: true,
+        default: new Date()
     },
     replies: [{
         type: mongoose.Schema.Types.ObjectId,
