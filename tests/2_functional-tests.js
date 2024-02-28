@@ -45,7 +45,6 @@ suite('Functional Tests', function() {
                     assert.property(res.body[0], "bumped_on", "thread should have a bumped");
                     assert.property(res.body[0], "replies", "thread should have a replies property");
                     assert.property(res.body[0], "replycount", "thread should have a replycount property");
-                    //assert.isArray(res.body[0], "replies", "Expects replies to be an array");
                     
                     done();
                 });
@@ -124,8 +123,6 @@ suite('Functional Tests', function() {
                     assert.property(res.body, "created_on", "There should be a created_on property");
                     assert.property(res.body, "delete_password", "There should be a delete_password property");
 
-                    //reply_id = res.body._id;
-
                     done();
                 });
         });
@@ -149,8 +146,7 @@ suite('Functional Tests', function() {
                 .send({ thread_id: id, reply_id: reply_id, delete_password: 'deletereplynot' })
                 .end((req, res) => {
                     assert.equal(res.status, 201);
-                    assert.isString(res.text, "response should be a string");
-                    
+                    assert.isString(res.text, "response should be a string");                    
                     assert.equal(res.text, 'incorrect password');
 
                     done();
@@ -163,8 +159,7 @@ suite('Functional Tests', function() {
                 .send({ thread_id: id, reply_id: reply_id, delete_password: 'deletereply' })
                 .end((req, res) => {
                     assert.equal(res.status, 200);
-                    assert.isString(res.text, "response should be a string");
-                    
+                    assert.isString(res.text, "response should be a string");                    
                     assert.equal(res.text, 'success')
 
                     done();
